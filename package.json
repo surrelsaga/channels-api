@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npx tsc",
-    "start": "npx tsc && node dist/index.js"
+    "dev": "node --watch src/server.ts",
+    "typecheck": "npx tsc --noEmit"
   },
   "repository": {
     "type": "git",
