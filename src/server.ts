@@ -94,5 +94,19 @@ const createMessage = (req: Request<{ channelId: string }, unknown, any>, res: R
     res.status(201).json({ 'messageSent': true });
 };
 
+const getMessage = (req: Request<{ channelId: string }>, res: Response) => {
+    // same logic to check for channel existence
+    const channelId = req.params.channelId;
+
+    if( channels.find(channel => channel.id === channelId) === undefined ) {
+        res.status(404).send({ error: 'channel not found'});
+        return;
+    }
+
+    // channel 100% exists here
+    res.status(200).send(messages.filter(msg => msg.channelId === channelId));
+}
+
 // the colon is to specify that sth is a parameter in the (POST) request: req.params
 app.post('/channels/:channelId/messages', createMessage);
+app.get('/channels/:channelId/messages', getMessage);
