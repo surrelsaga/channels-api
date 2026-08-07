@@ -1,9 +1,11 @@
 import express from 'express';
-import type {Express, Request, Response} from 'express'
+import type {Express, Request, Response} from 'express';
 import crypto from 'crypto';
 
-import { channels } from './data/channels.ts'
+import { channels } from './data/channels.ts';
 import type { Channel } from './data/channels.ts';
+import { messages } from './data/messages.ts';
+import type { Message } from './data/messages.ts';
 
 const app: Express = express();
 const port = 3000;
@@ -58,7 +60,7 @@ const createMessage = (req: Request<{ channelId: string }, unknown, any>, res: R
     }
 
     // the POST content will be stored inside req.body
-    const message = req.body;
+    const msg = req.body;
 
     // filter for the message
     // ideal: { "body" : "message_here" }
@@ -66,21 +68,29 @@ const createMessage = (req: Request<{ channelId: string }, unknown, any>, res: R
     // except for "   ", everything else is falsy
 
     // check if it's a string
-    if ( typeof message.body !== 'string' ) {
+    if ( typeof msg.body !== 'string' ) {
         res.status(400).send({ error: 'message must be a string.' });
 
         // response sent, stop here
         return;
     }
     // it's a string already so just one more filter for case of "   "
-    else if (!message.body.trim()) {
+    else if (!msg.body.trim()) {
         res.status(400).send({ error: 'message body must be a non-empty string' });
 
         // response sent, stop here
         return;
     }
+    // from this point, everything works fine. 
+    const createdMessage: Message = { 
+        channelId, 
+        msg: { body: msg.body } 
+    };
 
-    // if everything is fine. 201 is 200 but with a resource (message) created
+    // update to a "database": a separate module storing the channelId, and the message
+    messages.push(createdMessage);
+
+    //201 is 200 but with a resource (message) created
     res.status(201).json({ 'messageSent': true });
 };
 
